@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib. pyplot as plt
 import seaborn as sns
 
-def plot_count(df: pd.core.frame.DataFrame, col: str, xLabel: str, inner_colors: list=['#ff6905', '#ff8838', '#ffa66b'], title_name: str='Train') -> None:
+def plot_count(df: pd.core.frame.DataFrame, col: str, inner_colors: list=['#f6bb97', '#f4865e', '#ec4a3e', '#ca1a50', '#951c5b', '#601f52', '#2e1739'], title_name: str='Train') -> None:
     # Set background color
     
     f, ax = plt.subplots(1, 2, figsize=(14, 7))
@@ -22,8 +22,8 @@ def plot_count(df: pd.core.frame.DataFrame, col: str, xLabel: str, inner_colors:
     ax[0].pie(
         inner_sizes, colors=inner_colors,
         radius=1, startangle=90,
-        autopct='%1.f%%', explode=([.1]*(N-1) + [.1]),
-        pctdistance=0.8, textprops=textprops
+        autopct='%1.1f%%',
+        pctdistance=0.83, textprops=textprops
     )
 
     center_circle = plt.Circle((0,0), .68, color='black', fc='white', linewidth=0)
@@ -33,7 +33,7 @@ def plot_count(df: pd.core.frame.DataFrame, col: str, xLabel: str, inner_colors:
     y = s1.index.tolist()
     sns.barplot(
         x=x, y=y, ax=ax[1],
-        palette='YlOrBr_r', orient='horizontal'
+        palette='rocket_r', orient='horizontal'
     )
 
     ax[1].spines['top'].set_visible(False)
@@ -50,20 +50,22 @@ def plot_count(df: pd.core.frame.DataFrame, col: str, xLabel: str, inner_colors:
 
     plt.setp(ax[1].get_yticklabels(), fontweight="bold")
     plt.setp(ax[1].get_xticklabels(), fontweight="bold")
-    ax[1].set_xlabel(xLabel, fontweight="bold", color='black')
+    ax[1].set_xlabel(col, fontweight="bold", color='black')
     ax[1].set_ylabel('count', fontweight="bold", color='black')
 
     f.suptitle(f'{title_name}', fontsize=18, fontweight='bold')
     plt.tight_layout()
     plt.show()
 
-def bar_plot_all_categorical(df: pd.core.frame.DataFrame, categorical_cols: list, col: str) -> None:
+def bar_plot_all_categorical(df: pd.core.frame.DataFrame, categorical_cols: list, hue: str) -> None:
     plt.figure(figsize=(14, len(categorical_cols)*3))
 
     for i, col in enumerate(categorical_cols):
         
         plt.subplot(len(categorical_cols)//2 + len(categorical_cols) % 2, 2, i+1)
-        sns.countplot(x=col, hue=col, data=df, palette='YlOrRd')
+        ax = sns.countplot(x=col, hue=hue, data=df, palette='rocket_r')
+        for container in ax.containers:
+            ax.bar_label(container)
         plt.title(f"{col} countplot by ", fontweight = 'bold')
         plt.ylim(0, df[col].value_counts().max() + 10)
         
