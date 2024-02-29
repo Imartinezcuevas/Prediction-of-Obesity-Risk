@@ -2,13 +2,11 @@ import click
 import logging
 import warnings
 import optuna
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import StackingClassifier, RandomForestClassifier, HistGradientBoostingClassifier
+from sklearn.ensemble import StackingClassifier, RandomForestClassifier
 from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 from lightgbm import LGBMClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score
 import pandas as pd
 import numpy as np
 import pickle
@@ -86,7 +84,7 @@ def main():
     """ Train base models with tuned hyperparameters
     """
     logger = logging.getLogger(__name__)
-    logger.info('Training modelos with tuned hyperparameters')
+    logger.info('Training models with tuned hyperparameters')
 
     base_models = []
 
@@ -149,7 +147,7 @@ def main():
     print()
     base_models.append(("lgbm", LGBMClassifier().set_params(**study_lgbm.best_params)))
 
-    meta_model = XGBClassifier().set_params(**study_xgb)
+    meta_model = XGBClassifier().set_params(**study_xgb.best_params)
 
     stacking_model = StackingClassifier(estimators=base_models, final_estimator=meta_model)
     stacking_model.fit(X_train, y_train)

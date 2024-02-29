@@ -3,6 +3,8 @@ import click
 import logging
 from sklearn.model_selection import train_test_split
 import os
+from sklearn.preprocessing import OrdinalEncoder
+import pickle
 
 def get_variable_types(dataframe):
     continuous_vars = []
@@ -49,16 +51,22 @@ def main():
     continuous_vars, categorical_vars = get_variable_types(train)
     continuous_vars.remove('id'), categorical_vars.remove('NObeyesdad')
 
-    train = pd.get_dummies(train, columns=categorical_vars, drop_first=True)
-    test = pd.get_dummies(test, columns=categorical_vars, drop_first=True)
+    X = train.drop(['NObeyesdad'], axis=1)
+    enc = OrdinalEncoder()
+    train['NObeyesdad'] = enc.fit_transform(train['NObeyesdad'].values.reshape(-1, 1))
+    y = train['NObeyesdad']
+    pickle.dump(enc, open("./models/encoder.pkl", "wb"))
+
+    train = pd.get_dummies(train, drop_first=True, dtype=int)
+    cols = train.columns.tolist()
+    test = pd.get_dummies(test, drop_first=True, dtype=int)
+    test = test.reindex(columns=cols).fillna(0)
+    test = test.drop(['NObeyesdad'], axis=1)
 
     train['BMI'] = train['Weight'] / train['Height']**2
     test['BMI'] = test['Weight'] / test['Height']**2
     train['BMR'] = train.apply(lambda row: calculate_bmr(row['Weight'], row['Height'], row['Age'], row['Gender_Male']), axis=1)
     test['BMR'] = test.apply(lambda row: calculate_bmr(row['Weight'], row['Height'], row['Age'], row['Gender_Male']), axis=1)
-
-    X = train.drop(['NObeyesdad'], axis=1)
-    y = train['NObeyesdad']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 42)
 
